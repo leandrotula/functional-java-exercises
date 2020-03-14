@@ -25,6 +25,23 @@ public class JavaFunctionalTest {
 // DEFAULT METHODS
 // ========================================================
 
+    /**
+     * Create a function that sum all elements of a given collection.
+     */
+    @Test
+    public void ex00_1_sum_using_reduction() {
+
+        final List<Integer> numbers = List.of(1, 2, 32, 10);
+
+        int result = numbers.stream().reduce(0, (n1, n2) -> n1 + n2);
+
+        assertEquals(45, result);
+
+    }
+
+    /* Hint:
+     * Use Stream.reduce with initial value 0
+     */
 
     /**
      * Create a string that consists of the first letters of each
@@ -372,10 +389,15 @@ public class JavaFunctionalTest {
      *
      * @throws IOException
      */
-    @Test @Ignore
+    @Test
     public void ex17_sortedLowerCaseDistinctByLengthThenAlphabetically() throws IOException {
-        List<String> result = null; // TODO
-
+        List<String> result = reader.lines().map(line -> line.split(REGEXP))
+                .flatMap(Arrays::stream)
+                .map(String::toLowerCase)
+                .distinct()
+                .sorted(Comparator.comparing(String::length)
+                        .thenComparing(Comparator.naturalOrder()))
+                .collect(Collectors.toList());
 
         assertEquals(
                 Arrays.asList(
@@ -447,9 +469,13 @@ public class JavaFunctionalTest {
      *
      * @throws IOException
      */
-    @Test @Ignore
+    @Test
     public void ex20_getLastWord() throws IOException {
-        String result = null; // TODO
+
+        final List<String> strings = reader.lines().map(line -> line.split(REGEXP))
+                .flatMap(Arrays::stream).collect(Collectors.toList());
+        int size = strings.size();
+        String result = strings.get(size -1);
 
         assertEquals("thee", result);
     }
