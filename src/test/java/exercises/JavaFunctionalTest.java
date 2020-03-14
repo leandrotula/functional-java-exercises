@@ -472,12 +472,10 @@ public class JavaFunctionalTest {
     @Test
     public void ex20_getLastWord() throws IOException {
 
-        final List<String> strings = reader.lines().map(line -> line.split(REGEXP))
-                .flatMap(Arrays::stream).collect(Collectors.toList());
-        int size = strings.size();
-        String result = strings.get(size -1);
+        String lastWord = reader.lines().map(line -> line.split(REGEXP))
+                .flatMap(Arrays::stream).reduce("", (a,b) -> b);
 
-        assertEquals("thee", result);
+        assertEquals("thee", lastWord);
     }
     /* Hint:
      * Use Stream.reduce().
