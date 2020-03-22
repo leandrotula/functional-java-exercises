@@ -12,6 +12,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.*;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
@@ -181,9 +182,9 @@ public class JavaFunctionalTest {
      *
      * @throws IOException
      */
-    @Test @Ignore
+    @Test
     public void ex08_countLinesInFile() throws IOException {
-        long count = 0; // TODO
+        long count = reader.lines().count();
 
         assertEquals(14, count);
     }
@@ -200,9 +201,12 @@ public class JavaFunctionalTest {
      *
      * @throws IOException
      */
-    @Test @Ignore
+    @Test
     public void ex09_findLengthOfLongestLine() throws IOException {
-        int longestLength = 0; // TODO
+        int longestLength = reader.lines()
+                .max(Comparator.comparing(String::length))
+                .map(String::length)
+                .get();
 
         assertEquals(53, longestLength);
     }
@@ -219,9 +223,11 @@ public class JavaFunctionalTest {
      *
      * @throws IOException
      */
-    @Test @Ignore
+    @Test
     public void ex10_findLongestLine() throws IOException {
-        String longest = ""; // TODO
+
+        String longest = reader.lines()
+                .max(Comparator.comparing(String::length)).orElse("");
 
         assertEquals("Feed'st thy light's flame with self-substantial fuel,", longest);
     }
@@ -308,9 +314,10 @@ public class JavaFunctionalTest {
      *
      * @throws IOException
      */
-    @Test @Ignore
+    @Test
     public void ex14_listOfAllWords() throws IOException {
-        List<String> output = null; // TODO
+        List<String> output = reader.lines().map(line -> line.split(REGEXP))
+                .flatMap(Arrays::stream).collect(Collectors.toList());
 
         assertEquals(
                 Arrays.asList(
@@ -490,9 +497,11 @@ public class JavaFunctionalTest {
      *
      * @throws IOException
      */
-    @Test @Ignore
+    @Test
     public void ex21_mapLengthToWordList() throws IOException {
-        Map<Integer, List<String>> result = null; // TODO
+        Map<Integer, List<String>> result = reader.lines().map(line -> line.split(REGEXP))
+                .flatMap(Arrays::stream)
+                .collect(Collectors.groupingBy(String::length));
 
         assertEquals(10, result.get(7).size());
         assertEquals(new HashSet<>(Arrays.asList("beauty's", "increase", "ornament")), new HashSet<>(result.get(8)));
@@ -551,9 +560,12 @@ public class JavaFunctionalTest {
      *
      * @throws IOException
      */
-    @Test @Ignore
+    @Test
     public void ex23_wordFrequencies() throws IOException {
-        Map<String, Long> result = null; // TODO
+
+        Map<String, Long> result = reader.lines().map(line -> line.split(REGEXP))
+                .flatMap(Arrays::stream)
+                .collect(Collectors.groupingBy(Function.identity(), Collectors.counting()));
 
         assertEquals(2L, (long)result.get("tender"));
         assertEquals(6L, (long)result.get("the"));
@@ -568,6 +580,23 @@ public class JavaFunctionalTest {
      * For Collectors.groupingBy(), consider that each word needs to
      * be categorized by itself.
      */
+
+    @Test
+    public void ex23_wordFrequencies_usingToMap() throws IOException {
+
+        final Map<String, Long> result = reader.lines().map(line -> line.split(REGEXP))
+                .flatMap(Arrays::stream)
+                .collect(Collectors.toMap(Function.identity(), e -> 1L, Long::sum));
+
+        assertEquals(2L, (long)result.get("tender"));
+        assertEquals(6L, (long)result.get("the"));
+        assertEquals(1L, (long)result.get("churl"));
+        assertEquals(2L, (long)result.get("thine"));
+        assertEquals(1L, (long)result.get("world"));
+        assertEquals(4L, (long)result.get("thy"));
+        assertEquals(3L, (long)result.get("self"));
+        assertFalse(result.containsKey("lambda"));
+    }
     /* Hint 2:
      * For Collectors.toMap(), the first occurrence of a word should be mapped to 1.
      */
