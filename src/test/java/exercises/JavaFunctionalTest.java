@@ -12,13 +12,14 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.*;
+import java.util.concurrent.atomic.LongAdder;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
+import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
 import static org.junit.Assert.*;
-import static org.junit.Assert.assertEquals;
 
 public class JavaFunctionalTest {
 
@@ -435,13 +436,20 @@ public class JavaFunctionalTest {
      * Count the total number of words and the number of distinct, lower case
      * words in the text file, in one pass.
      */
-    @Test @Ignore
+    @Test
     public void ex18_countTotalAndDistinctWords() {
-        long distinctCount = 0; // TODO
-        long totalCount = 0; // TODO
 
-        assertEquals("distinct count", 81, distinctCount);
-        assertEquals("total count", 107, totalCount);
+        final LongAdder adder = new LongAdder();
+
+        long distinct =  reader.lines().map(line -> line.split(REGEXP))
+                .flatMap(Arrays::stream)
+                .map(String::toLowerCase)
+                .peek(s -> adder.increment())
+                .distinct()
+                .count();
+
+        assertEquals("distinct count", 81, distinct);
+        assertEquals("total count", 107, adder.intValue());
     }
     /* Hint 1:
      * Use Stream.peek().
@@ -460,11 +468,15 @@ public class JavaFunctionalTest {
      * Compute the value of 21!, that is, 21 factorial. This value is larger than
      * Long.MAX_VALUE, so you must use BigInteger.
      */
-    @Test @Ignore
+    @Test
     public void ex19_bigFactorial() {
-        BigInteger result = BigInteger.ONE; // TODO
 
-        assertEquals(new BigInteger("51090942171709440000"), result);
+        Optional<BigInteger> result = LongStream.rangeClosed(1, 21)
+                .mapToObj(BigInteger::valueOf)
+                .reduce(BigInteger::multiply);
+
+        assertTrue(result.isPresent());
+        assertEquals(new BigInteger("51090942171709440000"), result.get());
     }
     /* Hint:
      * Use LongStream and reduction.
