@@ -35,7 +35,7 @@ public class JavaFunctionalTest {
 
         final List<Integer> numbers = List.of(1, 2, 32, 10);
 
-        int result = numbers.stream().reduce(0, (n1, n2) -> n1 + n2);
+        int result = numbers.stream().reduce(0, Integer::sum);
 
         assertEquals(45, result);
 
@@ -110,17 +110,16 @@ public class JavaFunctionalTest {
      * Given a list of words, create a map whose keys are the first letters of
      * each words, and whose values are the sum of the lengths of those words.
      */
-    @Test @Ignore
+    @Test
     public void ex05_mapOfStringLengths() {
         List<String> list = Arrays.asList(
                 "aardvark", "bison", "capybara",
                 "alligator", "bushbaby", "chimpanzee",
                 "avocet", "bustard", "capuchin");
-        Map<String, Integer> result = new TreeMap<>();
 
-        //TODO code to populate result
-
-        assertEquals("{a=23, b=20, c=26}", result.toString());
+        Map<String, Integer> collectorResult = list.stream()
+                .collect(Collectors.toMap(s -> s.substring(0,1), String::length, Integer::sum));
+        assertEquals("{a=23, b=20, c=26}", collectorResult.toString());
     }
     /* Hint:
      * Use Map.merge() within Iterable.forEach().
@@ -136,7 +135,7 @@ public class JavaFunctionalTest {
      * Given a list of words, create an output list that contains
      * only the odd-length words, converted to upper case.
      */
-    @Test @Ignore
+    @Test
     public void ex06_upcaseOddLengthWords() {
         List<String> input = new ArrayList<>(Arrays.asList(
                 "alfa", "bravo", "charlie", "delta", "echo", "foxtrot"));
@@ -159,12 +158,17 @@ public class JavaFunctionalTest {
      * Join the second letters of words 1 through 4 of the list (inclusive,
      * counting from zero), separated by commas, into a single string.
      */
-    @Test @Ignore
+    @Test
     public void ex07_joinStreamRange() {
         List<String> input = new ArrayList<>(Arrays.asList(
                 "alfa", "bravo", "charlie", "delta", "echo", "foxtrot"));
 
-        String result = ""; // TODO
+        String result = input.stream()
+                .map(s -> s.charAt(1))
+                .map(Object::toString)
+                .limit(5)
+                .skip(1)
+                .collect(Collectors.joining(","));
 
         assertEquals("r,h,e,c", result);
     }
@@ -536,9 +540,11 @@ public class JavaFunctionalTest {
      *
      * @throws IOException
      */
-    @Test @Ignore
+    @Test
     public void ex22_mapLengthToWordCount() throws IOException {
-        Map<Integer, Long> result = null; // TODO
+        Map<Integer, Long> result = reader.lines().map(line -> line.split(REGEXP))
+                .flatMap(Arrays::stream)
+                .collect(Collectors.groupingBy(String::length, Collectors.counting()));
 
         assertEquals( 1L, (long)result.get(1));
         assertEquals(11L, (long)result.get(2));
